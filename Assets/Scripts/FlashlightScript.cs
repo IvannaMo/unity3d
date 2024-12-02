@@ -3,7 +3,7 @@ using UnityEngine;
 public class FlashlightScript : MonoBehaviour
 {
     private Transform parentTransform;
-    private Light light;
+    private Light flashlight;
     private float charge;
     private float workTime = 2.5f;
 
@@ -14,7 +14,7 @@ public class FlashlightScript : MonoBehaviour
         {
             Debug.LogError("FlashlightScript: parentTransform not found");
         }
-        light = GetComponent<Light>();
+        flashlight = GetComponent<Light>();
         charge = 1.0f;
     }
 
@@ -24,7 +24,7 @@ public class FlashlightScript : MonoBehaviour
 
         if (charge > 0 && !GameState.isDay)
         {
-            light.intensity = charge;
+            flashlight.intensity = charge;
             charge -= Time.deltaTime / workTime;
         }
 
@@ -39,5 +39,10 @@ public class FlashlightScript : MonoBehaviour
             if (f == Vector3.zero) f = Camera.main.transform.up;
             transform.forward = f.normalized;
         }
+    }
+
+    public void Charge(float amount)
+    {
+        charge = Mathf.Clamp(charge + amount, 0.0f, 1.0f);
     }
 }
