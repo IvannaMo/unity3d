@@ -2,28 +2,45 @@ using UnityEngine;
 
 public class BatteryScript : MonoBehaviour
 {
+    [SerializeField]
     private float capacity = 1.0f;
+    [SerializeField]
+    private bool isRandomCharge = false;
+    private AudioSource collectSound;
+    private float destroyTimeout;
 
     void Start()
     {
-        
+        collectSound = GetComponent<AudioSource>();
+        destroyTimeout = 0f;
     }
 
     void Update()
     {
-        
-    }
-
-    void OnTriggerEnter(Collider collider)
-    {
-        if (collider.CompareTag("Character"))
+        if (destroyTimeout > 0)
         {
-            FlashlightScript flashlight = collider.transform.Find("Flashlight")?.GetComponent<FlashlightScript>();
-            if (flashlight != null)
+            destroyTimeout -= Time.deltaTime;
+            if (destroyTimeout <= 0)
             {
-                flashlight.Charge(capacity);
                 Destroy(gameObject);
             }
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (isRandomCharge) capacity = Random.Range(0.3f, 1.0f);
+
+        if (other.CompareTag("Character"))
+        {
+            collectSound.Play();
+            GameState.TriggerGameEvent("Battery", new GameEvents.MessageEvent
+            {
+                message = $"Знайдено батарейку з зарядом {capacity:F1}",
+                data = capacity
+            });
+            //Destroy(gameObject);
+            destroyTimeout = 0.6f;
         }
     }
 }

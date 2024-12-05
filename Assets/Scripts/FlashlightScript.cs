@@ -7,6 +7,8 @@ public class FlashlightScript : MonoBehaviour
     private float charge;
     private float workTime = 2.5f;
 
+    public float chargeLevel => Mathf.Clamp01(charge);
+
     void Start()
     {
         parentTransform = transform.parent;
@@ -16,6 +18,7 @@ public class FlashlightScript : MonoBehaviour
         }
         flashlight = GetComponent<Light>();
         charge = 1.0f;
+        GameState.Subscribe(OnBatteryEvent, "Battery");
     }
 
     void Update()
@@ -24,7 +27,7 @@ public class FlashlightScript : MonoBehaviour
 
         if (charge > 0 && !GameState.isDay)
         {
-            flashlight.intensity = charge;
+            flashlight.intensity = chargeLevel;
             charge -= Time.deltaTime / workTime;
         }
 
@@ -41,8 +44,20 @@ public class FlashlightScript : MonoBehaviour
         }
     }
 
-    public void Charge(float amount)
+    private void OnBatteryEvent(string eventName, object data)
     {
-        charge = Mathf.Clamp(charge + amount, 0.0f, 1.0f);
+        if (data is GameEvents.MessageEvent e)
+        {
+            charge += (float)e.data;
+        }
     }
+    private void OnDestroy()
+    {
+        GameState.Unsubscribe(OnBatteryEvent, "Battery");
+    }
+
+    //public void Charge(float amount)
+    //{
+    //    charge = Mathf.Clamp(charge + amount, 0.0f, 1.0f);
+    //}
 }

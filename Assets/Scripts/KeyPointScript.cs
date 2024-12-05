@@ -5,7 +5,7 @@ public class KeyPointScript : MonoBehaviour
     [SerializeField]
     private string keyPointName = "1";
     [SerializeField]
-    private float timeout = 5.0f;
+    private float timeout = 2.0f;
     private float timeLeft;
 
     public float part;
@@ -26,6 +26,20 @@ public class KeyPointScript : MonoBehaviour
                 timeLeft = 0;
             }
             part = timeLeft / timeout;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Character"))
+        {
+            GameState.collectedItems.Add("Key" + keyPointName, part);
+            GameState.TriggerGameEvent("KeyPoint", new GameEvents.MessageEvent
+            {
+                message = "Знайдено ключ " + keyPointName,
+                data = part
+            });
+            Destroy(gameObject);
         }
     }
 }
